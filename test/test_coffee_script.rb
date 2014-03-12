@@ -56,6 +56,14 @@ class TestCoffeeScript < TestCase
     end
   end
 
+  def test_compilation_error_message_contains_location
+    begin
+      CoffeeScript.compile("puts 'Hello, World!'\nvar foo = true'\n")
+    rescue CoffeeScript::Error => e
+      assert_match 'SyntaxError: :2:1:', e.message
+    end
+  end
+
   def assert_no_match(expected, actual)
     assert !expected.match(actual)
   end
