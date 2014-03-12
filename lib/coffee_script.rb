@@ -55,7 +55,21 @@ module CoffeeScript
         options[:bare] = false
       end
 
-      Source.context.call("CoffeeScript.compile", script, options)
+      wrapper = <<-WRAPPER
+        (function(script, options) {
+          try {
+            return CoffeeScript.compile(script, options);
+          } catch (err) {
+            if (err instanceof SyntaxError && err.location) {
+              throw new SyntaxError([options.filename, err.location.first_line + 1, err.location.first_column + 1].join(":") + ": " + err.message)
+            } else {
+              throw err;
+            }
+          }
+        })
+      WRAPPER
+
+      Source.context.call(wrapper, script, options)
     end
   end
 end
